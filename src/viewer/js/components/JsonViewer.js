@@ -1,27 +1,29 @@
 import React from 'react';
-import JsonObject from './DataTypes/Object';
+import JsonObject from './DataTypes/JsonObject';
 import ArrayGroup from './ArrayGroup';
+import { observer } from 'mobx-react';
 
-export default class extends React.PureComponent {
-    render = () => {
-        const {props} = this;
-        const namespace = [props.name];
-        let ObjectComponent = JsonObject;
+class JsonViewer extends React.PureComponent {
+  render = () => {
+    const { props } = this;
 
-        if (props.groupArraysAfterLength && props.src.length > props.groupArraysAfterLength) {
-            ObjectComponent = ArrayGroup;
-        }
+    console.log('Inside JsonViewer props', props);
 
-        return (
-            <div class="pretty-json-container object-container" >
-                <div class="object-content">
-                    <ObjectComponent
-                        namespace={namespace}
-                        depth={0}
-                        jsvRoot={true}
-                        {...props} />
-                </div>
-            </div>
-        );
+    const namespace = [props.name];
+    let ObjectComponent = JsonObject;
+
+    if (props.groupArraysAfterLength && props.src.length > props.groupArraysAfterLength) {
+      ObjectComponent = ArrayGroup;
     }
+
+    return (
+      <div class='pretty-json-container object-container'>
+        <div class='object-content'>
+          <ObjectComponent namespace={namespace} depth={0} jsvRoot={true} {...props} />
+        </div>
+      </div>
+    );
+  };
 }
+
+export default observer((props) => <JsonViewer {...props} />);

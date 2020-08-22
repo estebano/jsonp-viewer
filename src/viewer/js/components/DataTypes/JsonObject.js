@@ -1,32 +1,36 @@
 import React from 'react';
-import { toType } from './../../helpers/util';
+import { toType } from '../../helpers/util';
 
 //data type components
-import { JsonObject } from './DataTypes';
 
-import VariableEditor from './../VariableEditor';
-import VariableMeta from './../VariableMeta';
-import ArrayGroup from './../ArrayGroup';
-import ObjectName from './../ObjectName';
+import VariableEditor from '../VariableEditor';
+import VariableMeta from '../VariableMeta';
+import ArrayGroup from '../ArrayGroup';
+import ObjectName from '../ObjectName';
 
 //attribute store
-import AttributeStore from './../../stores/ObjectAttributes';
+import AttributeStore from '../../stores/ObjectAttributes';
 
 //icons
-import { CollapsedIcon, ExpandedIcon } from './../ToggleIcons';
+import { CollapsedIcon, ExpandedIcon } from '../ToggleIcons';
 
 //theme
-import Theme from './../../themes/getStyle';
+import Theme from '../../themes/getStyle';
+import { observer } from 'mobx-react';
+import { get as _get } from 'lodash';
+import { get, toJS } from 'mobx';
+import { stringify } from 'jsonpath';
+import { useIsFocusVisible } from '@material-ui/core';
 
 //increment 1 with each nested object & array
 const DEPTH_INCREMENT = 1;
 //single indent is 5px
 const SINGLE_INDENT = 5;
 
-class RjvObject extends React.PureComponent {
+class JsonObject extends React.PureComponent {
   constructor(props) {
     super(props);
-    const state = RjvObject.getState(props);
+    const state = JsonObject.getState(props);
     this.state = {
       ...state,
       prevProps: {},
@@ -34,7 +38,9 @@ class RjvObject extends React.PureComponent {
   }
 
   static getState = (props) => {
-    const size = Object.keys(props.src).length;
+    const { store, namespace } = props;
+    if (!props.src.value) debugger;
+    const size = Object.keys(props.src.value).length;
     const expanded =
       (props.collapsed === false || (props.collapsed !== true && props.collapsed > props.depth)) &&
       (!props.shouldCollapse ||
@@ -47,7 +53,15 @@ class RjvObject extends React.PureComponent {
       //initialize closed if object has no items
       size !== 0;
     const state = {
-      expanded: AttributeStore.get(props.rjvId, props.namespace, 'expanded', expanded),
+      expanded:
+        namespace.length === 1
+          ? !store.tree.isCollapsed
+          : (() => {
+              let v = !_get(store.tree, namespace.slice(1).push('isCollapsed'));
+              debugger;
+              return v;
+            })(),
+      // AttributeStore.get(props.rjvId, props.namespace, 'expanded', expanded),
       object_type: props.type === 'array' ? 'array' : 'object',
       parent_type: props.type === 'array' ? 'array' : 'object',
       size,
@@ -64,7 +78,7 @@ class RjvObject extends React.PureComponent {
       nextProps.namespace !== prevProps.namespace ||
       nextProps.rjvId !== prevProps.rjvId
     ) {
-      const newState = RjvObject.getState(nextProps);
+      const newState = JsonObject.getState(nextProps);
       return {
         ...newState,
         prevProps: nextProps,
@@ -80,6 +94,7 @@ class RjvObject extends React.PureComponent {
       },
       () => {
         AttributeStore.set(this.props.rjvId, this.props.namespace, 'expanded', this.state.expanded);
+        this.props.store.toggleCollapsed(this.props.namespace);
       }
     );
   };
@@ -170,6 +185,17 @@ class RjvObject extends React.PureComponent {
 
     const { object_type, expanded } = this.state;
 
+    console.log('Inside JsonObject props', this.props);
+    try {
+      let pathx = namespace.slice(1);
+      console.log('pathx', pathx);
+      let ax = _get(rest.store.tree, stringify(pathx));
+      let tmp = namespace.length > 1 ? ax : rest.store.tree;
+      console.log('store rerender', tmp);
+    } catch (e) {
+      console.warn(e);
+    }
+
     let styles = {};
     if (!jsvRoot && parent_type !== 'array_group') {
       styles.paddingLeft = this.props.indentWidth * SINGLE_INDENT;
@@ -182,7 +208,7 @@ class RjvObject extends React.PureComponent {
       <div class='object-key-val' {...Theme(theme, jsvRoot ? 'jsv-root' : 'objectKeyVal', styles)}>
         {this.getBraceStart(object_type, expanded)}
         {expanded
-          ? this.getObjectContent(depth, src, {
+          ? this.getObjectContent(depth, src.value, {
               theme,
               iconStyle,
               ...rest,
@@ -197,7 +223,7 @@ class RjvObject extends React.PureComponent {
           >
             {object_type === 'array' ? ']' : '}'}
           </span>
-          {expanded ? null : this.getObjectMetaData(src)}
+          {expanded ? null : this.getObjectMetaData(src.value)}
         </span>
       </div>
     );
@@ -224,13 +250,13 @@ class RjvObject extends React.PureComponent {
       } else if (variable.type === 'object') {
         elements.push(
           <JsonObject
+            {...props}
             key={variable.name}
             depth={depth + DEPTH_INCREMENT}
             name={variable.name}
             src={variable.value}
-            namespace={namespace.concat(variable.name)}
+            namespace={namespace.concat(['value', variable.name])}
             parent_type={object_type}
-            {...props}
           />
         );
       } else if (variable.type === 'array') {
@@ -246,7 +272,7 @@ class RjvObject extends React.PureComponent {
             depth={depth + DEPTH_INCREMENT}
             name={variable.name}
             src={variable.value}
-            namespace={namespace.concat(variable.name)}
+            namespace={namespace.concat(['value', variable.name])}
             type='array'
             parent_type={object_type}
             {...props}
@@ -272,11 +298,12 @@ class RjvObject extends React.PureComponent {
 //just store name, value and type with a variable
 class JsonVariable {
   constructor(name, value) {
+    let isPrimitive = value.type === 'primitive';
     this.name = name;
-    this.value = value;
-    this.type = toType(value);
+    this.value = isPrimitive ? toJS(value.value) : value;
+    this.type = toType(isPrimitive ? toJS(value.value) : value);
   }
 }
 
 //export component
-export default RjvObject;
+export default observer(JsonObject);

@@ -5,7 +5,7 @@ import jp from 'jsonpath';
 import { get } from 'lodash';
 //import { recursiveMerge } from './Store';
 import { observer } from 'mobx-react';
-import ReactJsonView from './viewer/js';
+import ReactJsonView from './viewer/js/ReactJsonView';
 
 const App = observer(({ store }) => {
   //recursiveMerge(inp, { XA: false, XX: false });
@@ -56,6 +56,7 @@ const App = observer(({ store }) => {
         ></TextField>
       </header>
       <ReactJsonView
+        store={store}
         src={store.tree}
         iconStyle='square'
         displayDataTypes={false}

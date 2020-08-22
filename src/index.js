@@ -3,14 +3,17 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import Store from './Store';
+import MobxStoe from './viewer/js/stores/MobXStore';
 import inp from './json/inp.json';
+import 'mobx-react/batchingForReactDom';
 
-const store = new Store(inp);
+const mobXStore = new MobxStoe(inp);
+
+delete window.inp;
 
 ReactDOM.render(
   <React.StrictMode>
-    <App store={store} />
+    <App store={mobXStore} />
   </React.StrictMode>,
   document.getElementById('root')
 );
