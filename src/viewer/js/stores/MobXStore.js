@@ -52,7 +52,6 @@ class Store {
 
   setNewTree(json) {
     this.tree = observable.object(recursiveBoxing(json));
-    console.log('this.tree', this.tree);
   }
 
   setCollapsed(namespace, value) {
@@ -68,7 +67,7 @@ class Store {
     let wrapper = _get(this.tree, path);
     wrapper.isCollapsed = !wrapper.isCollapsed;
     //let result = _set({}, path, !val);
-    debugger;
+
     //set(this.tree, result);
   }
 }

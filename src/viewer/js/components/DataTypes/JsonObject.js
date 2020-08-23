@@ -39,7 +39,6 @@ class JsonObject extends React.PureComponent {
 
   static getState = (props) => {
     const { store, namespace } = props;
-    if (!props.src.value) debugger;
     const size = Object.keys(props.src.value).length;
     const expanded =
       (props.collapsed === false || (props.collapsed !== true && props.collapsed > props.depth)) &&
@@ -58,7 +57,7 @@ class JsonObject extends React.PureComponent {
           ? !store.tree.isCollapsed
           : (() => {
               let v = !_get(store.tree, namespace.slice(1).push('isCollapsed'));
-              debugger;
+
               return v;
             })(),
       // AttributeStore.get(props.rjvId, props.namespace, 'expanded', expanded),
@@ -101,8 +100,8 @@ class JsonObject extends React.PureComponent {
 
   getObjectContent = (depth, src, props) => {
     return (
-      <div class='pushed-content object-container'>
-        <div class='object-content' {...Theme(this.props.theme, 'pushed-content')}>
+      <div className='pushed-content object-container'>
+        <div className='object-content' {...Theme(this.props.theme, 'pushed-content')}>
           {this.renderObjectContents(src, props)}
         </div>
       </div>
@@ -119,7 +118,7 @@ class JsonObject extends React.PureComponent {
       return (
         <div
           {...Theme(this.props.theme, 'ellipsis')}
-          class='node-ellipsis'
+          className='node-ellipsis'
           onClick={this.toggleCollapsed}
         >
           ...
@@ -156,7 +155,7 @@ class JsonObject extends React.PureComponent {
           }}
           {...Theme(theme, 'brace-row')}
         >
-          <div class='icon-container' {...Theme(theme, 'icon-container')}>
+          <div className='icon-container' {...Theme(theme, 'icon-container')}>
             <IconComponent {...{ theme, iconStyle }} />
           </div>
           <ObjectName {...this.props} />
@@ -185,17 +184,6 @@ class JsonObject extends React.PureComponent {
 
     const { object_type, expanded } = this.state;
 
-    console.log('Inside JsonObject props', this.props);
-    try {
-      let pathx = namespace.slice(1);
-      console.log('pathx', pathx);
-      let ax = _get(rest.store.tree, stringify(pathx));
-      let tmp = namespace.length > 1 ? ax : rest.store.tree;
-      console.log('store rerender', tmp);
-    } catch (e) {
-      console.warn(e);
-    }
-
     let styles = {};
     if (!jsvRoot && parent_type !== 'array_group') {
       styles.paddingLeft = this.props.indentWidth * SINGLE_INDENT;
@@ -205,7 +193,10 @@ class JsonObject extends React.PureComponent {
     }
 
     return (
-      <div class='object-key-val' {...Theme(theme, jsvRoot ? 'jsv-root' : 'objectKeyVal', styles)}>
+      <div
+        className='object-key-val'
+        {...Theme(theme, jsvRoot ? 'jsv-root' : 'objectKeyVal', styles)}
+      >
         {this.getBraceStart(object_type, expanded)}
         {expanded
           ? this.getObjectContent(depth, src.value, {
@@ -214,7 +205,7 @@ class JsonObject extends React.PureComponent {
               ...rest,
             })
           : this.getEllipsis()}
-        <span class='brace-row'>
+        <span className='brace-row'>
           <span
             style={{
               ...Theme(theme, 'brace').style,

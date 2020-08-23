@@ -6,11 +6,13 @@ import { get } from 'lodash';
 //import { recursiveMerge } from './Store';
 import { observer } from 'mobx-react';
 import ReactJsonView from './viewer/js/ReactJsonView';
+import { css, cx } from 'emotion';
+
+const classes = css({
+  'background-color': 'pink',
+});
 
 const App = observer(({ store }) => {
-  //recursiveMerge(inp, { XA: false, XX: false });
-  //console.log('inp', inp);
-
   const [formula, setFormula] = useState('');
 
   const onFormulaChange = useCallback((e) => {
@@ -34,17 +36,16 @@ const App = observer(({ store }) => {
         let v = get(tree, x);
         return typeof v !== 'string' ? JSON.stringify(v) : v;
       });
-      console.log('paths', paths);
-      console.log('accs', acc);
-      console.log('values', values);
     } catch (e) {
       console.warn(e);
     }
   }
 
+  let cxx = cx('App-header', classes);
+
   return (
     <div className='App'>
-      <header className='App-header'>
+      <header className={cxx}>
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
