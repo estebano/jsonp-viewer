@@ -6,11 +6,7 @@ import { get } from 'lodash';
 //import { recursiveMerge } from './Store';
 import { observer } from 'mobx-react';
 import ReactJsonView from './viewer/js/ReactJsonView';
-import { css, cx } from 'emotion';
-
-const classes = css({
-  'background-color': 'pink',
-});
+import { cx } from 'emotion';
 
 const App = observer(({ store }) => {
   const [formula, setFormula] = useState('');
@@ -41,11 +37,9 @@ const App = observer(({ store }) => {
     }
   }
 
-  let cxx = cx('App-header', classes);
-
   return (
     <div className='App'>
-      <header className={cxx}>
+      <header className='App-header'>
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>

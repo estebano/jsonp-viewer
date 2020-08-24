@@ -6,7 +6,8 @@ import { toType, isTheme } from './helpers/util';
 import ObjectAttributes from './stores/ObjectAttributes';
 
 //global theme
-import Theme from './themes/getStyle';
+import { createControlLabeledStyles } from './themes/createStylist';
+import { cx } from 'emotion';
 
 //some style behavior requires css
 import './../style/scss/global.scss';
@@ -24,11 +25,7 @@ class ReactJsonView extends React.PureComponent {
       name: ReactJsonView.defaultProps.name,
       theme: ReactJsonView.defaultProps.theme,
       validationMessage: ReactJsonView.defaultProps.validationMessage,
-      // the state object also needs to remember the prev prop values, because we need to compare
-      // old and new props in getDerivedStateFromProps().
-      prevSrc: ReactJsonView.defaultProps.src,
-      prevName: ReactJsonView.defaultProps.name,
-      prevTheme: ReactJsonView.defaultProps.theme,
+      labeledStyles: createControlLabeledStyles(ReactJsonView.defaultProps.theme),
     };
   }
 
@@ -61,20 +58,20 @@ class ReactJsonView extends React.PureComponent {
 
   // will trigger whenever setState() is called, or parent passes in new props.
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (
-      nextProps.src !== prevState.prevSrc ||
-      nextProps.name !== prevState.prevName ||
-      nextProps.theme !== prevState.prevTheme
-    ) {
+    const srcDiffers = nextProps.src !== prevState.src;
+    const nameDiffers = nextProps.name !== prevState.nam;
+    const themeDiffers = nextProps.theme !== prevState.theme;
+
+    if (srcDiffers || nameDiffers || themeDiffers) {
       // if we pass in new props, we re-validate
       const newPartialState = {
         src: nextProps.src,
         name: nextProps.name,
         theme: nextProps.theme,
         validationMessage: nextProps.validationMessage,
-        prevSrc: nextProps.src,
-        prevName: nextProps.name,
-        prevTheme: nextProps.theme,
+        labeledStyles: themeDiffers
+          ? createControlLabeledStyles(nextProps.theme)
+          : prevState.labeledStyles,
       };
       return ReactJsonView.validateState(newPartialState);
     }
@@ -94,6 +91,13 @@ class ReactJsonView extends React.PureComponent {
       addKeyRequest: false,
       editKeyRequest: false,
     });
+
+    console.log(
+      'performance',
+      performance.getEntriesByType('measure').reduce((val, current, index) => {
+        return val + current.duration;
+      }, 0)
+    );
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -156,17 +160,27 @@ class ReactJsonView extends React.PureComponent {
   };
 
   render() {
-    const { validationFailure, validationMessage, addKeyRequest, theme, src, name } = this.state;
+    const {
+      validationFailure,
+      validationMessage,
+      addKeyRequest,
+      theme,
+      src,
+      name,
+      labeledStyles,
+    } = this.state;
 
     const { style, defaultValue } = this.props;
 
     return (
-      <div className='react-json-view' style={{ ...Theme(theme, 'app-container').style, ...style }}>
+      <div className={cx('react-json-view', labeledStyles.appContainer)} style={style}>
         <ValidationFailure
           message={validationMessage}
           active={validationFailure}
           theme={theme}
           rjvId={this.rjvId}
+          labeledStyles={labeledStyles}
+          cx={cx}
         />
         <JsonViewer
           {...this.props}
@@ -175,12 +189,16 @@ class ReactJsonView extends React.PureComponent {
           theme={theme}
           type={toType(src)}
           rjvId={this.rjvId}
+          labeledStyles={labeledStyles}
+          cx={cx}
         />
         <AddKeyRequest
           active={addKeyRequest}
           theme={theme}
           rjvId={this.rjvId}
           defaultValue={defaultValue}
+          labeledStyles={labeledStyles}
+          cx={cx}
         />
       </div>
     );

@@ -1,28 +1,27 @@
 import React from 'react';
-import Theme from './../themes/getStyle';
 
 import { CircleMinus, CirclePlus, SquareMinus, SquarePlus, ArrowRight, ArrowDown } from './icons';
 
 export function ExpandedIcon(props) {
-  const { theme, iconStyle } = props;
+  const { cx, labeledStyles, iconStyle } = props;
   switch (iconStyle) {
     case 'triangle':
-      return <ArrowDown {...Theme(theme, 'expanded-icon')} className='expanded-icon' />;
+      return <ArrowDown className={cx('expanded-icon', labeledStyles.expandedIcon)} />;
     case 'square':
-      return <SquareMinus {...Theme(theme, 'expanded-icon')} className='expanded-icon' />;
+      return <SquareMinus className={cx('expanded-icon', labeledStyles.expandedIcon)} />;
     default:
-      return <CircleMinus {...Theme(theme, 'expanded-icon')} className='expanded-icon' />;
+      return <CircleMinus className={cx('expanded-icon', labeledStyles.expandedIcon)} />;
   }
 }
 
 export function CollapsedIcon(props) {
-  const { theme, iconStyle } = props;
+  const { cx, labeledStyles, iconStyle } = props;
   switch (iconStyle) {
     case 'triangle':
-      return <ArrowRight {...Theme(theme, 'collapsed-icon')} className='collapsed-icon' />;
+      return <ArrowRight className={cx('collapsed-icon', labeledStyles.collapsedIcon)} />;
     case 'square':
-      return <SquarePlus {...Theme(theme, 'collapsed-icon')} className='collapsed-icon' />;
+      return <SquarePlus className={cx('collapsed-icon', labeledStyles.collapsedIcon)} />;
     default:
-      return <CirclePlus {...Theme(theme, 'collapsed-icon')} className='collapsed-icon' />;
+      return <CirclePlus className={cx('collapsed-icon', labeledStyles.collapsedIcon)} />;
   }
 }

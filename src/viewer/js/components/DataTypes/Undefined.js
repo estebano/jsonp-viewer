@@ -1,15 +1,8 @@
 import React from 'react';
 
-//theme
-import Theme from './../../themes/getStyle';
-
 export default class extends React.PureComponent {
-
-    render() {
-        return (
-            <div {...Theme(this.props.theme, 'undefined')}>
-                undefined
-            </div>
-        );
-    }
+  render() {
+    const { cx, labeledStyles } = this.props;
+    return <div className={cx(labeledStyles.undefined)}>undefined</div>;
+  }
 }

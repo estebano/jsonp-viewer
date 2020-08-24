@@ -1,13 +1,11 @@
 import React from 'react';
 import DataTypeLabel from './DataTypeLabel';
 
-//theme
-import Theme from './../../themes/getStyle';
-
 export default class extends React.PureComponent {
   render() {
     const type_name = 'date';
     const { props } = this;
+    const { cx, labeledStyles } = props;
     const display_options = {
       weekday: 'short',
       year: 'numeric',
@@ -17,9 +15,9 @@ export default class extends React.PureComponent {
       minute: '2-digit',
     };
     return (
-      <div {...Theme(props.theme, 'date')}>
+      <div className={cx(labeledStyles.date)}>
         <DataTypeLabel type_name={type_name} {...props} />
-        <span className='date-value' {...Theme(props.theme, 'date-value')}>
+        <span className={cx('date-value', labeledStyles.dateValue)}>
           {props.value.toLocaleTimeString('en-us', display_options)}
         </span>
       </div>

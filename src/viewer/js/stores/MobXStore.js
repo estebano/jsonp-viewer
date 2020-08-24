@@ -23,17 +23,17 @@ export const BoxingWrapper = (type) => {
   return result;
 };
 
-export function recursiveBoxing(obj) {
+function recursiveStructuralBoxing(obj) {
   let result = undefined;
   if (typeof obj === 'object') {
     if (Array.isArray(obj)) {
       result = BoxingWrapper(BoxingType.array);
-      obj.forEach((element) => result.value.push(recursiveBoxing(element)));
+      obj.forEach((element) => result.value.push(recursiveStructuralBoxing(element)));
     } else {
       result = BoxingWrapper(BoxingType.object);
 
       Object.entries(obj).forEach(([key, value]) => {
-        result.value[key] = recursiveBoxing(value);
+        result.value[key] = recursiveStructuralBoxing(value);
       });
     }
   } else {
@@ -51,7 +51,8 @@ class Store {
   }
 
   setNewTree(json) {
-    this.tree = observable.object(recursiveBoxing(json));
+    let prep = recursiveStructuralBoxing(json);
+    this.tree = observable.object(prep);
   }
 
   setCollapsed(namespace, value) {

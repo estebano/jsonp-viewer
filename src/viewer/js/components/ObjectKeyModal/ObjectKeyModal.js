@@ -3,9 +3,6 @@ import dispatcher from './../../helpers/dispatcher';
 
 import { CheckCircle, Add as Cancel } from './../icons';
 
-//global theme
-import Theme from './../../themes/getStyle';
-
 //this input appears when adding a new value to an object
 export default class extends React.PureComponent {
   constructor(props) {
@@ -16,28 +13,26 @@ export default class extends React.PureComponent {
   }
 
   render() {
-    const { theme, rjvId, isValid } = this.props;
+    const { cx, labeledStyles, rjvId, isValid } = this.props;
     const { input } = this.state;
 
     const valid = isValid(input);
 
     return (
       <div
-        className='key-modal-request'
-        {...Theme(theme, 'key-modal-request')}
+        className={cx('key-modal-request', labeledStyles['key-modal-request'])}
         onClick={this.closeModal}
       >
         <div
-          {...Theme(theme, 'key-modal')}
+          className={cx(labeledStyles['key-modal'])}
           onClick={(e) => {
             e.stopPropagation();
           }}
         >
-          <div {...Theme(theme, 'key-modal-label')}>Key Name:</div>
+          <div className={cx(labeledStyles['key-modal-label'])}>Key Name:</div>
           <div style={{ position: 'relative' }}>
             <input
-              {...Theme(theme, 'key-modal-input')}
-              className='key-modal-input'
+              className={cx('key-modal-input', labeledStyles['key-modal-input'])}
               ref={(el) => el && el.focus()}
               spellCheck={false}
               value={input}
@@ -57,16 +52,14 @@ export default class extends React.PureComponent {
             />
             {valid ? (
               <CheckCircle
-                {...Theme(theme, 'key-modal-submit')}
-                className='key-modal-submit'
+                className={cx('key-modal-submit', labeledStyles['key-modal-submit'])}
                 onClick={(e) => this.submit()}
               />
             ) : null}
           </div>
-          <span {...Theme(theme, 'key-modal-cancel')}>
+          <span className={cx(labeledStyles['key-modal-cancel'])}>
             <Cancel
-              {...Theme(theme, 'key-modal-cancel-icon')}
-              className='key-modal-cancel'
+              className={cx('key-modal-cancel', labeledStyles['key-modal-cancel-icon'])}
               onClick={() => {
                 dispatcher.dispatch({
                   rjvId: rjvId,

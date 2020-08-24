@@ -6,9 +6,6 @@ import stringifyVariable from './../helpers/stringifyVariable';
 //clibboard icon
 import { Clippy } from './icons';
 
-//theme
-import Theme from './../themes/getStyle';
-
 export default class extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -58,18 +55,17 @@ export default class extends React.PureComponent {
   };
 
   getClippyIcon = () => {
-    const { theme } = this.props;
-
+    const { cx, labeledStyles } = this.props;
     if (this.state.copied) {
       return (
         <span>
-          <Clippy className='copy-icon' {...Theme(theme, 'copy-icon')} />
-          <span {...Theme(theme, 'copy-icon-copied')}>✔</span>
+          <Clippy className={cx('copy-icon', labeledStyles.copyIcon)} />
+          <span className={cx(labeledStyles.copuIconCopied)}>✔</span>
         </span>
       );
     }
 
-    return <Clippy className='copy-icon' {...Theme(theme, 'copy-icon')} />;
+    return <Clippy className={cx('copy-icon', labeledStyles.copyIcon)} />;
   };
 
   clipboardValue = (value) => {
@@ -84,8 +80,7 @@ export default class extends React.PureComponent {
   };
 
   render() {
-    const { src, theme, hidden } = this.props;
-    let style = Theme(theme, 'copy-to-clipboard').style;
+    const { src, hidden, cx, labeledStyles } = this.props;
     let display = 'inline';
 
     if (hidden) {
@@ -95,8 +90,8 @@ export default class extends React.PureComponent {
     return (
       <span className='copy-to-clipboard-container' title='Copy to clipboard'>
         <span
+          className={cx(labeledStyles.copyToClipboard)}
           style={{
-            ...style,
             display: display,
           }}
           onClick={this.handleCopy}

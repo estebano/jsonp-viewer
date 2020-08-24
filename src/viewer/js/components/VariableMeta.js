@@ -7,15 +7,12 @@ import { toType } from './../helpers/util';
 //icons
 import { RemoveCircle as Remove, AddCircle as Add } from './icons';
 
-//theme
-import Theme from './../themes/getStyle';
-
 export default class extends React.PureComponent {
   getObjectSize = () => {
-    const { size, theme, displayObjectSize } = this.props;
+    const { size, cx, labeledStyles, displayObjectSize } = this.props;
     if (displayObjectSize) {
       return (
-        <span className='object-size' {...Theme(theme, 'object-size')}>
+        <span className={cx('object-size', labeledStyles.objectSize)}>
           {size} item{size === 1 ? '' : 's'}
         </span>
       );
@@ -23,13 +20,12 @@ export default class extends React.PureComponent {
   };
 
   getAddAttribute = () => {
-    const { theme, namespace, name, src, rjvId, depth } = this.props;
+    const { cx, labeledStyles, namespace, name, src, rjvId, depth } = this.props;
 
     return (
       <span className='click-to-add' style={{ verticalAlign: 'top' }}>
         <Add
-          className='click-to-add-icon'
-          {...Theme(theme, 'addVarIcon')}
+          className={cx('click-to-add-icon', labeledStyles.addVarIcon)}
           onClick={() => {
             const request = {
               name: depth > 0 ? name : null,
@@ -61,7 +57,7 @@ export default class extends React.PureComponent {
   };
 
   getRemoveObject = () => {
-    const { theme, hover, namespace, name, src, rjvId } = this.props;
+    const { cx, labeledStyles, hover, namespace, name, src, rjvId } = this.props;
 
     //don't allow deleting of root node
     if (namespace.length === 1) {
@@ -70,8 +66,7 @@ export default class extends React.PureComponent {
     return (
       <span className='click-to-remove'>
         <Remove
-          className='click-to-remove-icon'
-          {...Theme(theme, 'removeVarIcon')}
+          className={cx('click-to-remove-icon', labeledStyles.removeVarIcon)}
           onClick={() => {
             dispatcher.dispatch({
               name: 'VARIABLE_REMOVED',
@@ -90,11 +85,10 @@ export default class extends React.PureComponent {
   };
 
   render = () => {
-    const { theme, onDelete, onAdd, enableClipboard, src, namespace } = this.props;
+    const { cx, labeledStyles, onDelete, onAdd, enableClipboard, src, namespace } = this.props;
     return (
       <div
-        {...Theme(theme, 'object-meta-data')}
-        className='object-meta-data'
+        className={cx('object-meta-data', labeledStyles.objectMetaData)}
         onClick={(e) => {
           e.stopPropagation();
         }}
@@ -103,7 +97,7 @@ export default class extends React.PureComponent {
         {this.getObjectSize()}
         {/* copy to clipboard icon */}
         {enableClipboard ? (
-          <CopyToClipboard clickCallback={enableClipboard} {...{ src, theme, namespace }} />
+          <CopyToClipboard clickCallback={enableClipboard} {...{ src, namespace }} />
         ) : null}
         {/* copy add/remove icons */}
         {onAdd !== false ? this.getAddAttribute() : null}

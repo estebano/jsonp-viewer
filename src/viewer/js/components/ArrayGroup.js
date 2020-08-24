@@ -1,5 +1,5 @@
 import React from 'react';
-import Theme from './../themes/getStyle';
+import { Theme } from './../themes/createStylist';
 
 import VariableMeta from './VariableMeta';
 import ObjectName from './ObjectName';
@@ -31,13 +31,13 @@ export default class extends React.PureComponent {
   };
 
   getExpandedIcon(i) {
-    const { theme, iconStyle } = this.props;
+    const { theme, iconStyle, cx, labeledStyles } = this.props;
 
     if (this.state.expanded[i]) {
-      return <ExpandedIcon {...{ theme, iconStyle }} />;
+      return <ExpandedIcon {...{ theme, iconStyle, cx, labeledStyles }} />;
     }
 
-    return <CollapsedIcon {...{ theme, iconStyle }} />;
+    return <CollapsedIcon {...{ theme, iconStyle, cx, labeledStyles }} />;
   }
 
   render() {
@@ -50,6 +50,8 @@ export default class extends React.PureComponent {
       jsvRoot,
       namespace,
       parent_type,
+      labeledStyles,
+      cx,
       ...rest
     } = this.props;
 
@@ -80,16 +82,15 @@ export default class extends React.PureComponent {
         {[...Array(groups)].map((_, i) => (
           <div
             key={i}
-            className='object-key-val array-group'
-            {...Theme(theme, 'objectKeyVal', {
+            className={cx('object-key-val', 'array-group', labeledStyles.objectKeyVal)}
+            style={{
               marginLeft: 6,
               paddingLeft: array_group_padding_left,
-            })}
+            }}
           >
-            <span {...Theme(theme, 'brace-row')}>
+            <span className={cx(labeledStyles.braceRow)}>
               <div
-                className='icon-container'
-                {...Theme(theme, 'icon-container')}
+                className={cx('icon-container', labeledStyles.iconContainer)}
                 onClick={(e) => {
                   this.toggleCollapsed(i);
                 }}
@@ -108,20 +109,20 @@ export default class extends React.PureComponent {
                   namespace={namespace}
                   type='array'
                   parent_type='array_group'
-                  theme={theme}
                   {...rest}
                 />
               ) : (
                 <span
-                  {...Theme(theme, 'brace')}
                   onClick={(e) => {
                     this.toggleCollapsed(i);
                   }}
-                  className='array-group-brace'
+                  className={cx('array-group-brace', labeledStyles.brace)}
                 >
                   [
-                  <div {...Theme(theme, 'array-group-meta-data')} className='array-group-meta-data'>
-                    <span className='object-size' {...Theme(theme, 'object-size')}>
+                  <div className={cx('array-group-meta-data', labeledStyles.arrayGroupMetaData)}>
+                    <span className={cx('object-size', labeledStyles.objectSize)}>
+                      {' '}
+                      {'>'}
                       {i * size}
                       {' - '}
                       {i * size + size > src.length ? src.length : i * size + size}

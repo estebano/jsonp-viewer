@@ -25,7 +25,7 @@ import {
 import { Edit, CheckCircle, RemoveCircle as Remove } from './icons';
 
 //theme
-import Theme from './../themes/getStyle';
+import { Theme } from './../themes/createStylist';
 
 class VariableEditor extends React.PureComponent {
   constructor(props) {
@@ -55,6 +55,8 @@ class VariableEditor extends React.PureComponent {
       onDelete,
       onSelect,
       rjvId,
+      cx,
+      labeledStyles,
     } = this.props;
     const { editMode } = this.state;
 
@@ -67,22 +69,21 @@ class VariableEditor extends React.PureComponent {
         key={variable.name}
       >
         {type == 'array' ? (
-          <span {...Theme(theme, 'array-key')} key={variable.name + '_' + namespace}>
+          <span className={cx(labeledStyles.arrayKey)} key={variable.name + '_' + namespace}>
             {variable.name}
-            <div {...Theme(theme, 'colon')}>:</div>
+            <div className={cx(labeledStyles.colon)}>:</div>
           </span>
         ) : (
           <span>
             <span
-              {...Theme(theme, 'object-name')}
-              className='object-key'
+              className={cx('object-key', labeledStyles.objectName)}
               key={variable.name + '_' + namespace}
             >
               <span style={{ verticalAlign: 'top' }}>"</span>
               <span style={{ display: 'inline-block' }}>{variable.name}</span>
               <span style={{ verticalAlign: 'top' }}>"</span>
             </span>
-            <span {...Theme(theme, 'colon')}>:</span>
+            <span className={cx(labeledStyles.colon)}>:</span>
           </span>
         )}
         <div
@@ -114,7 +115,7 @@ class VariableEditor extends React.PureComponent {
             hidden={editMode}
             src={variable.value}
             clickCallback={enableClipboard}
-            {...{ theme, namespace }}
+            namespace={namespace}
           />
         ) : null}
         {onEdit !== false && editMode == false ? this.getEditIcon() : null}
@@ -124,13 +125,12 @@ class VariableEditor extends React.PureComponent {
   }
 
   getEditIcon = () => {
-    const { variable, theme } = this.props;
+    const { variable, cx, labeledStyles } = this.props;
 
     return (
       <div className='click-to-edit' style={{ verticalAlign: 'top' }}>
         <Edit
-          className='click-to-edit-icon'
-          {...Theme(theme, 'editVarIcon')}
+          className={cx('click-to-edit-icon', labeledStyles.editVarIcon)}
           onClick={() => {
             this.prepopInput(variable);
           }}
@@ -155,13 +155,12 @@ class VariableEditor extends React.PureComponent {
   };
 
   getRemoveIcon = () => {
-    const { variable, namespace, theme, rjvId } = this.props;
+    const { variable, namespace, cx, labeledStyles, rjvId } = this.props;
 
     return (
       <div className='click-to-remove' style={{ verticalAlign: 'top' }}>
         <Remove
-          className='click-to-remove-icon'
-          {...Theme(theme, 'removeVarIcon')}
+          className={cx('click-to-remove-icon', labeledStyles.editVarIcon)}
           onClick={() => {
             dispatcher.dispatch({
               name: 'VARIABLE_REMOVED',
@@ -212,7 +211,7 @@ class VariableEditor extends React.PureComponent {
   };
 
   getEditInput = () => {
-    const { theme } = this.props;
+    const { labeledStyles, cx } = this.props;
     const { editValue } = this.state;
 
     return (
@@ -221,7 +220,8 @@ class VariableEditor extends React.PureComponent {
           type='text'
           inputRef={(input) => input && input.focus()}
           value={editValue}
-          className='variable-editor'
+          className={cx('variable-editor', labeledStyles.editInput)}
+          placeholder='update this value'
           onChange={(event) => {
             const value = event.target.value;
             const detected = parseInput(value);
@@ -234,6 +234,7 @@ class VariableEditor extends React.PureComponent {
             });
           }}
           onKeyDown={(e) => {
+            // eslint-disable-next-line default-case
             switch (e.key) {
               case 'Escape': {
                 this.setState({
@@ -251,20 +252,16 @@ class VariableEditor extends React.PureComponent {
             }
             e.stopPropagation();
           }}
-          placeholder='update this value'
-          {...Theme(theme, 'edit-input')}
         />
-        <div {...Theme(theme, 'edit-icon-container')}>
+        <div className={cx(labeledStyles.editIconContainer)}>
           <Remove
-            className='edit-cancel'
-            {...Theme(theme, 'cancel-icon')}
+            className={cx('edit-cancel', labeledStyles.cancelIcon)}
             onClick={() => {
               this.setState({ editMode: false, editValue: '' });
             }}
           />
           <CheckCircle
-            className='edit-check string-value'
-            {...Theme(theme, 'check-icon')}
+            className={cx('edit-check', 'string-value', labeledStyles.checkIcon)}
             onClick={() => {
               this.submitEdit();
             }}
@@ -299,20 +296,19 @@ class VariableEditor extends React.PureComponent {
   };
 
   showDetected = () => {
-    const { theme, variable, namespace, rjvId } = this.props;
+    const { variable, namespace, rjvId, cx, labeledStyles } = this.props;
     const { type, value } = this.state.parsedInput;
     const detected = this.getDetectedInput();
     if (detected) {
       return (
         <div>
-          <div {...Theme(theme, 'detected-row')}>
+          <div className={cx(labeledStyles.detectedRow)}>
             {detected}
             <CheckCircle
-              className='edit-check detected'
+              className={cx('edit-check', 'detected', labeledStyles.checkIcon)}
               style={{
                 verticalAlign: 'top',
                 paddingLeft: '3px',
-                ...Theme(theme, 'check-icon').style,
               }}
               onClick={() => {
                 this.submitEdit(true);
@@ -328,32 +324,33 @@ class VariableEditor extends React.PureComponent {
     const { parsedInput } = this.state;
     const { type, value } = parsedInput;
     const { props } = this;
-    const { theme } = props;
+    const { cx, labeledStyles } = props;
 
     if (type !== false) {
+      // eslint-disable-next-line default-case
       switch (type.toLowerCase()) {
         case 'object':
           return (
             <span>
               <span
+                className={cx(labeledStyles.brace)}
                 style={{
-                  ...Theme(theme, 'brace').style,
                   cursor: 'default',
                 }}
               >
                 {'{'}
               </span>
               <span
+                className={cx(labeledStyles.ellipsis)}
                 style={{
-                  ...Theme(theme, 'ellipsis').style,
                   cursor: 'default',
                 }}
               >
                 ...
               </span>
               <span
+                className={cx(labeledStyles.brace)}
                 style={{
-                  ...Theme(theme, 'brace').style,
                   cursor: 'default',
                 }}
               >
@@ -365,24 +362,24 @@ class VariableEditor extends React.PureComponent {
           return (
             <span>
               <span
+                className={cx(labeledStyles.brace)}
                 style={{
-                  ...Theme(theme, 'brace').style,
                   cursor: 'default',
                 }}
               >
                 {'['}
               </span>
               <span
+                className={cx(labeledStyles.ellipsis)}
                 style={{
-                  ...Theme(theme, 'ellipsis').style,
                   cursor: 'default',
                 }}
               >
                 ...
               </span>
               <span
+                className={cx(labeledStyles.brace)}
                 style={{
-                  ...Theme(theme, 'brace').style,
                   cursor: 'default',
                 }}
               >

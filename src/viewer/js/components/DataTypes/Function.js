@@ -1,9 +1,6 @@
 import React from 'react';
 import DataTypeLabel from './DataTypeLabel';
 
-//theme
-import Theme from './../../themes/getStyle';
-
 //attribute store for storing collapsed state
 import AttributeStore from './../../stores/ObjectAttributes';
 
@@ -35,14 +32,14 @@ export default class extends React.PureComponent {
   render() {
     const type_name = 'function';
     const { props } = this;
+    const { cx, labeledStyles } = this.props;
     const { collapsed } = this.state;
 
     return (
-      <div {...Theme(props.theme, 'function')}>
+      <div className={cx(labeledStyles.function)}>
         <DataTypeLabel type_name={type_name} {...props} />
         <span
-          {...Theme(props.theme, 'function-value')}
-          className='rjv-function-container'
+          className={cx('rjv-function-container', labeledStyles.functionValue)}
           onClick={this.toggleCollapsed}
         >
           {this.getFunctionDisplay(collapsed)}
@@ -53,6 +50,7 @@ export default class extends React.PureComponent {
 
   getFunctionDisplay = (collapsed) => {
     const { props } = this;
+    const { cx, labeledStyles } = this.props;
     if (collapsed) {
       return (
         <span>
@@ -62,7 +60,7 @@ export default class extends React.PureComponent {
             .replace(/\{[\s\S]+/, '')}
           <span className='function-collapsed' style={{ fontWeight: 'bold' }}>
             <span>{'{'}</span>
-            <span {...Theme(props.theme, 'ellipsis')}>...</span>
+            <span className={cx(labeledStyles.ellipsis)}>...</span>
             <span>{'}'}</span>
           </span>
         </span>

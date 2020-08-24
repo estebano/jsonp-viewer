@@ -15,7 +15,7 @@ import AttributeStore from '../../stores/ObjectAttributes';
 import { CollapsedIcon, ExpandedIcon } from '../ToggleIcons';
 
 //theme
-import Theme from '../../themes/getStyle';
+import { Theme } from '../../themes/createStylist';
 import { observer } from 'mobx-react';
 import { get as _get } from 'lodash';
 import { get, toJS } from 'mobx';
@@ -99,9 +99,10 @@ class JsonObject extends React.PureComponent {
   };
 
   getObjectContent = (depth, src, props) => {
+    const { cx, labeledStyles } = this.props;
     return (
       <div className='pushed-content object-container'>
-        <div className='object-content' {...Theme(this.props.theme, 'pushed-content')}>
+        <div className={cx('object-content', labeledStyles.objectContent)}>
           {this.renderObjectContents(src, props)}
         </div>
       </div>
@@ -110,17 +111,14 @@ class JsonObject extends React.PureComponent {
 
   getEllipsis = () => {
     const { size } = this.state;
+    const { cx, labeledStyles } = this.props;
 
     if (size === 0) {
       //don't render an ellipsis when an object has no items
       return null;
     } else {
       return (
-        <div
-          {...Theme(this.props.theme, 'ellipsis')}
-          className='node-ellipsis'
-          onClick={this.toggleCollapsed}
-        >
+        <div className={cx('node-ellipsis', labeledStyles.ellipsis)} onClick={this.toggleCollapsed}>
           ...
         </div>
       );
@@ -128,18 +126,18 @@ class JsonObject extends React.PureComponent {
   };
 
   getObjectMetaData = (src) => {
-    const { rjvId, theme } = this.props;
+    const { rjvId } = this.props;
     const { size } = this.state;
     return <VariableMeta size={size} {...this.props} />;
   };
 
   getBraceStart(object_type, expanded) {
-    const { src, theme, iconStyle, parent_type } = this.props;
+    const { src, iconStyle, parent_type, cx, labeledStyles } = this.props;
 
     if (parent_type === 'array_group') {
       return (
         <span>
-          <span {...Theme(theme, 'brace')}>{object_type === 'array' ? '[' : '{'}</span>
+          <span className={cx(labeledStyles.brace)}>{object_type === 'array' ? '[' : '{'}</span>
           {expanded ? this.getObjectMetaData(src) : null}
         </span>
       );
@@ -150,16 +148,16 @@ class JsonObject extends React.PureComponent {
     return (
       <span>
         <span
+          className={cx(labeledStyles.braceRow)}
           onClick={(e) => {
             this.toggleCollapsed();
           }}
-          {...Theme(theme, 'brace-row')}
         >
-          <div className='icon-container' {...Theme(theme, 'icon-container')}>
-            <IconComponent {...{ theme, iconStyle }} />
+          <div className={cx('icon-container', labeledStyles.iconContainer)}>
+            <IconComponent iconStyle={iconStyle} cx={cx} labeledStyles={labeledStyles} />
           </div>
           <ObjectName {...this.props} />
-          <span {...Theme(theme, 'brace')}>{object_type === 'array' ? '[' : '{'}</span>
+          <span className={cx(labeledStyles.brace)}>{object_type === 'array' ? '[' : '{'}</span>
         </span>
         {expanded ? this.getObjectMetaData(src) : null}
       </span>
@@ -176,9 +174,11 @@ class JsonObject extends React.PureComponent {
       name,
       type,
       parent_type,
-      theme,
+      cx,
+      labeledStyles,
       jsvRoot,
       iconStyle,
+      theme,
       ...rest
     } = this.props;
 
@@ -200,15 +200,17 @@ class JsonObject extends React.PureComponent {
         {this.getBraceStart(object_type, expanded)}
         {expanded
           ? this.getObjectContent(depth, src.value, {
-              theme,
               iconStyle,
+              cx,
+              labeledStyles,
+              theme,
               ...rest,
             })
           : this.getEllipsis()}
         <span className='brace-row'>
           <span
+            className={cx(labeledStyles.brace)}
             style={{
-              ...Theme(theme, 'brace').style,
               paddingLeft: expanded ? '3px' : '0px',
             }}
           >
@@ -223,7 +225,6 @@ class JsonObject extends React.PureComponent {
   renderObjectContents = (variables, props) => {
     const { depth, parent_type, index_offset, groupArraysAfterLength, namespace } = this.props;
     const { object_type } = this.state;
-    let theme = props.theme;
     let elements = [],
       variable;
     let keys = Object.keys(variables || {});
@@ -259,6 +260,7 @@ class JsonObject extends React.PureComponent {
 
         elements.push(
           <ObjectComponent
+            {...props}
             key={variable.name}
             depth={depth + DEPTH_INCREMENT}
             name={variable.name}
@@ -266,18 +268,17 @@ class JsonObject extends React.PureComponent {
             namespace={namespace.concat(['value', variable.name])}
             type='array'
             parent_type={object_type}
-            {...props}
           />
         );
       } else {
         elements.push(
           <VariableEditor
+            {...props}
             key={variable.name + '_' + namespace}
             variable={variable}
             singleIndent={SINGLE_INDENT}
             namespace={namespace}
             type={this.props.type}
-            {...props}
           />
         );
       }

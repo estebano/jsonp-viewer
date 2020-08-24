@@ -1,6 +1,7 @@
 import { rjv_default, rjv_grey } from './base16/rjv-themes';
 import constants from './styleConstants';
 import { createStyling } from 'react-base16-styling';
+import { css } from 'emotion';
 
 const colorMap = (theme) => ({
   backgroundColor: theme.base00,
@@ -395,12 +396,98 @@ const getStyle = (theme) => {
   return createStyling(getDefaultThemeStyling, { defaultBase16: rjv_theme })(theme);
 };
 
-export default function style(theme, component, args) {
+export const createStylist = (theme) => {
+  let stylist = getStyle(theme);
+  return (component, args) => stylist(component, args);
+};
+
+export const createLabelingStylist = (theme) => {
+  let stylist = getStyle(theme);
+
+  return (component, args) => ({ ...stylist(component, args).style, label: component });
+};
+
+export function Theme(theme, component, args) {
   if (!theme) {
     console.error('theme has not been set');
   }
+  performance.mark('startX');
 
   let x = getStyle(theme)(component, args);
-
+  performance.mark('stopX');
+  performance.measure('X', 'startX', 'stopX');
   return x;
 }
+
+export const createControlLabeledStyles = (theme) => {
+  performance.mark('startX');
+
+  const stylist = createLabelingStylist(theme);
+
+  const styles = {
+    appContainer: stylist('app-container'),
+    checkIcon: stylist('check-icon'),
+    detectedRow: stylist('detected-row'),
+    editInput: stylist('edit-input'),
+    editIconContainer: stylist('edit-icon-container'),
+    cancelIcon: stylist('cancel-icon'),
+    //objectKeyVal: stylist('objectKeyVal'),
+    arrayKey: stylist('array-key'),
+    colon: stylist('colon'),
+    //variableValue: stylist('variableValue'),
+    copyIcon: stylist('copy-icon'),
+    copyIconCopied: stylist('copy-icon-copied'),
+    objectName: stylist('object-name'),
+    copyToClipboard: stylist('copy-to-clipboard'),
+    editVarIcon: stylist('editVarIcon'),
+    removeVarIcon: stylist('removeVarIcon'),
+    brace: stylist('brace'),
+    ellipsis: stylist('ellipsis'),
+    pushedContent: stylist('pushed-content'),
+    iconContainer: stylist('icon-container'),
+    braceRow: stylist('brace-row'),
+    jsvRoot: stylist('jsv-root'),
+    arrayGroupMetaData: stylist('array-group-meta-data'),
+    objectSize: stylist('object-size'),
+    expandedIcon: stylist('expanded-icon'),
+    collapsedIcon: stylist('collapsed-icon'),
+    validationFailure: stylist('validation-failure'),
+    validationFailureLabel: stylist('validation-failure-label'),
+    validationFailureClear: stylist('validation-failure-clear'),
+    addVarIcon: stylist('addVarIcon'),
+    objectMetaData: stylist('object-meta-data'),
+    boolean: stylist('boolean'),
+    dataTypeLabel: stylist('data-type-label'),
+    date: stylist('date'),
+    dateValue: stylist('date-value'),
+    float: stylist('float'),
+    function: stylist('function'),
+    functionValue: stylist('function-value'),
+
+    integer: stylist('integer'),
+    nan: stylist('nan'),
+    nul: stylist('nul'),
+    regexp: stylist('regexp'),
+    string: stylist('string'),
+    undefined: stylist('undefined'),
+
+    'key-modal-request': stylist('key-modal-request'),
+    'key-modal': stylist('key-modal'),
+    'key-modal-label': stylist('key-modal-label'),
+    'key-modal-input': stylist('key-modal-input'),
+    'key-modal-submit': stylist('key-modal-submit'),
+    'key-modal-cancel': stylist('key-modal-cancel'),
+    'key-modal-cancel-icon': stylist('key-modal-cancel-icon'),
+  };
+
+  Object.keys(styles).forEach((key) => {
+    if (styles.hasOwnProperty(key)) {
+      styles[key] = css(styles[key]);
+    }
+  });
+
+  performance.mark('stopX');
+  performance.measure('X', 'startX', 'stopX');
+
+  return styles;
+};

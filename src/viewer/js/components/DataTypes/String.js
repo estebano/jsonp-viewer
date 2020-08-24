@@ -2,9 +2,6 @@ import React from 'react';
 import DataTypeLabel from './DataTypeLabel';
 import { toType } from './../../helpers/util';
 
-//theme
-import Theme from './../../themes/getStyle';
-
 //attribute store for storing collapsed state
 import AttributeStore from './../../stores/ObjectAttributes';
 
@@ -36,7 +33,7 @@ export default class extends React.PureComponent {
     const type_name = 'string';
     const { collapsed } = this.state;
     const { props } = this;
-    const { collapseStringsAfterLength, theme } = props;
+    const { collapseStringsAfterLength, cx, labeledStyles } = props;
     let { value } = props;
     let collapsible = toType(collapseStringsAfterLength) === 'integer';
     let style = { style: { cursor: 'default' } };
@@ -47,14 +44,14 @@ export default class extends React.PureComponent {
         value = (
           <span>
             {value.substring(0, collapseStringsAfterLength)}
-            <span {...Theme(theme, 'ellipsis')}> ...</span>
+            <span className={cx(labeledStyles.ellipsis)}> ...</span>
           </span>
         );
       }
     }
 
     return (
-      <div {...Theme(theme, 'string')}>
+      <div className={cx(labeledStyles.string)}>
         <DataTypeLabel type_name={type_name} {...props} />
         <span className='string-value' {...style} onClick={this.toggleCollapsed}>
           "{value}"
