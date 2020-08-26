@@ -3,17 +3,14 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import MobxStoe from './viewer/js/stores/MobXStore';
-import inp from './json/inp.json';
 import 'mobx-react/batchingForReactDom';
-
-const mobXStore = new MobxStoe(inp);
-
-delete window.inp;
+import { SnackbarProvider } from 'notistack';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App store={mobXStore} />
+    <SnackbarProvider maxSnack={3}>
+      <App />
+    </SnackbarProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

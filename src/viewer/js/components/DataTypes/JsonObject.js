@@ -60,6 +60,7 @@ class JsonObject extends React.PureComponent {
 
               return v;
             })(),
+      isMatched: _get(store.tree, namespace.slice(1).push('isMatched')),
       // AttributeStore.get(props.rjvId, props.namespace, 'expanded', expanded),
       object_type: props.type === 'array' ? 'array' : 'object',
       parent_type: props.type === 'array' ? 'array' : 'object',
@@ -182,7 +183,7 @@ class JsonObject extends React.PureComponent {
       ...rest
     } = this.props;
 
-    const { object_type, expanded } = this.state;
+    const { object_type, expanded, isMatched } = this.state;
 
     let styles = {};
     if (!jsvRoot && parent_type !== 'array_group') {
@@ -191,10 +192,9 @@ class JsonObject extends React.PureComponent {
       styles.borderLeft = 0;
       styles.display = 'inline';
     }
-
     return (
       <div
-        className='object-key-val'
+        className={cx('object-key-val', isMatched ? 'matched' : '')}
         {...Theme(theme, jsvRoot ? 'jsv-root' : 'objectKeyVal', styles)}
       >
         {this.getBraceStart(object_type, expanded)}

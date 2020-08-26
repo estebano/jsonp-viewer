@@ -15,6 +15,7 @@
     "mobx": "^5.15.6",
     "mobx-react": "^6.2.5",
     "node-sass": "^4.14.1",
+    "notistack": "^1.0.0",
     "react": "^16.13.1",
     "react-base16-styling": "^0.7.0",
     "react-dom": "^16.13.1",

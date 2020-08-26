@@ -7,11 +7,12 @@ import ObjectComponent from './DataTypes/JsonObject';
 
 //icons
 import { CollapsedIcon, ExpandedIcon } from './ToggleIcons';
+import { observer } from 'mobx-react';
 
 //single indent is 5px
 const SINGLE_INDENT = 5;
 
-export default class extends React.PureComponent {
+class ArrayGroup extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -138,3 +139,5 @@ export default class extends React.PureComponent {
     );
   }
 }
+
+export default observer(ArrayGroup);

@@ -21,6 +21,7 @@
   justify-content: flex-start;
   font-size: calc(10px + 2vmin);
   color: white;
+  padding: 1.5rem;
 }
 
 .App-link {
@@ -36,6 +37,6 @@
   }
 }
 
-.txt {
-  width: 100rem;
+.MuiFormControl-root.fullwidth {
+  width: 100%;
 }

@@ -9,7 +9,13 @@ export const BoxingType = {
 };
 
 export const BoxingWrapper = (type) => {
-  let result = { isMatched: false, isCollapsed: false, value: undefined, type: type };
+  let result = {
+    isMatched: false,
+    isCollapsed: false,
+    value: undefined,
+    type: type,
+    subNodesCount: 0,
+  };
   switch (type) {
     case BoxingType.array:
       result.value = [];
@@ -25,15 +31,20 @@ export const BoxingWrapper = (type) => {
 
 function recursiveStructuralBoxing(obj) {
   let result = undefined;
-  if (typeof obj === 'object') {
+  if (obj && typeof obj === 'object') {
     if (Array.isArray(obj)) {
       result = BoxingWrapper(BoxingType.array);
       obj.forEach((element) => result.value.push(recursiveStructuralBoxing(element)));
+      result.subNodesCount = result.value.reduce((accumulator, item) => {
+        return (accumulator += item.subNodesCount);
+      }, obj.length);
     } else {
       result = BoxingWrapper(BoxingType.object);
 
-      Object.entries(obj).forEach(([key, value]) => {
-        result.value[key] = recursiveStructuralBoxing(value);
+      Object.entries(obj).forEach(([key, propValue]) => {
+        let boxingResult = recursiveStructuralBoxing(propValue);
+        result.value[key] = boxingResult;
+        result.subNodesCount += boxingResult.subNodesCount + 1;
       });
     }
   } else {
