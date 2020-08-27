@@ -44,7 +44,6 @@ class VariableEditor extends React.PureComponent {
   render() {
     const {
       variable,
-      src,
       singleIndent,
       type,
       theme,
@@ -58,6 +57,9 @@ class VariableEditor extends React.PureComponent {
       cx,
       labeledStyles,
     } = this.props;
+
+    if (!variable.isVisible) return null;
+
     const { editMode } = this.state;
 
     return (

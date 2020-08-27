@@ -8,9 +8,12 @@ import ObjectAttributes from './stores/ObjectAttributes';
 //global theme
 import { createControlLabeledStyles } from './themes/createStylist';
 import { cx } from 'emotion';
+import InfiniteScroller from 'react-infinite-scroller';
 
 //some style behavior requires css
 import './../style/scss/global.scss';
+import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 
 //forward src through to JsonObject component
 class ReactJsonView extends React.PureComponent {
@@ -98,23 +101,25 @@ class ReactJsonView extends React.PureComponent {
         return val + current.duration;
       }, 0)
     );
+
+    this.props.store.showNextPage(300);
   }
 
   componentDidUpdate(prevProps, prevState) {
-    //reset key request to false once it's observed
-    if (prevState.addKeyRequest !== false) {
-      this.setState({
-        addKeyRequest: false,
-      });
-    }
-    if (prevState.editKeyRequest !== false) {
-      this.setState({
-        editKeyRequest: false,
-      });
-    }
-    if (prevProps.src !== this.state.src) {
-      ObjectAttributes.set(this.rjvId, 'global', 'src', this.state.src);
-    }
+    // // // //reset key request to false once it's observed
+    // // // if (prevState.addKeyRequest !== false) {
+    // // //   this.setState({
+    // // //     addKeyRequest: false,
+    // // //   });
+    // // // }
+    // // // if (prevState.editKeyRequest !== false) {
+    // // //   this.setState({
+    // // //     editKeyRequest: false,
+    // // //   });
+    // // // }
+    // // // if (prevProps.src !== this.state.src) {
+    // // //   ObjectAttributes.set(this.rjvId, 'global', 'src', this.state.src);
+    // // // }
   }
 
   componentWillUnmount() {
@@ -159,6 +164,10 @@ class ReactJsonView extends React.PureComponent {
     };
   };
 
+  loadFunction = () => {
+    this.props.store.showNextPage();
+  };
+
   render() {
     const {
       validationFailure,
@@ -171,36 +180,47 @@ class ReactJsonView extends React.PureComponent {
     } = this.state;
 
     const { style, defaultValue } = this.props;
+    let hasMore = this.props.store.hasMore;
+    console.log('hasMore', toJS(hasMore));
 
     return (
-      <div className={cx('react-json-view', labeledStyles.appContainer)} style={style}>
-        <ValidationFailure
-          message={validationMessage}
-          active={validationFailure}
-          theme={theme}
-          rjvId={this.rjvId}
-          labeledStyles={labeledStyles}
-          cx={cx}
-        />
-        <JsonViewer
-          {...this.props}
-          src={src}
-          name={name}
-          theme={theme}
-          type={toType(src)}
-          rjvId={this.rjvId}
-          labeledStyles={labeledStyles}
-          cx={cx}
-        />
-        <AddKeyRequest
-          active={addKeyRequest}
-          theme={theme}
-          rjvId={this.rjvId}
-          defaultValue={defaultValue}
-          labeledStyles={labeledStyles}
-          cx={cx}
-        />
-      </div>
+      // <div className='infinite-scroller' style={{ flex: '0 1 auto', overflow: 'auto' }}>
+      <InfiniteScroller
+        initialLoad={false}
+        loadMore={this.loadFunction}
+        hasMore={hasMore.value}
+        threshold={860}
+      >
+        <div className={cx('react-json-view', labeledStyles.appContainer)} style={style}>
+          <ValidationFailure
+            message={validationMessage}
+            active={validationFailure}
+            theme={theme}
+            rjvId={this.rjvId}
+            labeledStyles={labeledStyles}
+            cx={cx}
+          />
+          <JsonViewer
+            {...this.props}
+            src={src}
+            name={name}
+            theme={theme}
+            type={toType(src)}
+            rjvId={this.rjvId}
+            labeledStyles={labeledStyles}
+            cx={cx}
+          />
+          <AddKeyRequest
+            active={addKeyRequest}
+            theme={theme}
+            rjvId={this.rjvId}
+            defaultValue={defaultValue}
+            labeledStyles={labeledStyles}
+            cx={cx}
+          />
+        </div>
+      </InfiniteScroller>
+      // </div>
     );
   }
 
@@ -239,6 +259,8 @@ class ReactJsonView extends React.PureComponent {
       case 'variable-removed':
         result = onDelete(on_edit_payload);
         break;
+      default:
+        throw new Error('default stub');
     }
 
     if (result !== false) {
@@ -267,4 +289,4 @@ class ReactJsonView extends React.PureComponent {
   };
 }
 
-export default ReactJsonView;
+export default observer(ReactJsonView);

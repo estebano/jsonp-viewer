@@ -99,12 +99,12 @@ class JsonObject extends React.PureComponent {
     );
   };
 
-  getObjectContent = (depth, src, props) => {
+  getObjectContent = (depth, src, args) => {
     const { cx, labeledStyles } = this.props;
     return (
-      <div className='pushed-content object-container'>
+      <div className={cx('pushed-content', 'object-container', { 'cls-hidden': args.hidden })}>
         <div className={cx('object-content', labeledStyles.objectContent)}>
-          {this.renderObjectContents(src, props)}
+          {this.renderObjectContents(src, args)}
         </div>
       </div>
     );
@@ -183,6 +183,8 @@ class JsonObject extends React.PureComponent {
       ...rest
     } = this.props;
 
+    if (!src.isVisible) return null;
+
     const { object_type, expanded, isMatched } = this.state;
 
     let styles = {};
@@ -192,21 +194,22 @@ class JsonObject extends React.PureComponent {
       styles.borderLeft = 0;
       styles.display = 'inline';
     }
+
     return (
       <div
         className={cx('object-key-val', isMatched ? 'matched' : '')}
         {...Theme(theme, jsvRoot ? 'jsv-root' : 'objectKeyVal', styles)}
       >
         {this.getBraceStart(object_type, expanded)}
-        {expanded
-          ? this.getObjectContent(depth, src.value, {
-              iconStyle,
-              cx,
-              labeledStyles,
-              theme,
-              ...rest,
-            })
-          : this.getEllipsis()}
+        {this.getObjectContent(depth, src.value, {
+          ...rest,
+          iconStyle,
+          cx,
+          labeledStyles,
+          theme,
+          hidden: !expanded,
+        })}
+        {this.getEllipsis()}
         <span className='brace-row'>
           <span
             className={cx(labeledStyles.brace)}
@@ -222,7 +225,7 @@ class JsonObject extends React.PureComponent {
     );
   }
 
-  renderObjectContents = (variables, props) => {
+  renderObjectContents = (variables, args) => {
     const { depth, parent_type, index_offset, groupArraysAfterLength, namespace } = this.props;
     const { object_type } = this.state;
     let elements = [],
@@ -242,7 +245,7 @@ class JsonObject extends React.PureComponent {
       } else if (variable.type === 'object') {
         elements.push(
           <JsonObject
-            {...props}
+            {...args}
             key={variable.name}
             depth={depth + DEPTH_INCREMENT}
             name={variable.name}
@@ -254,13 +257,13 @@ class JsonObject extends React.PureComponent {
       } else if (variable.type === 'array') {
         let ObjectComponent = JsonObject;
 
-        if (groupArraysAfterLength && variable.value.length > groupArraysAfterLength) {
+        if (groupArraysAfterLength && variable.value.value.length > groupArraysAfterLength) {
           ObjectComponent = ArrayGroup;
         }
 
         elements.push(
           <ObjectComponent
-            {...props}
+            {...args}
             key={variable.name}
             depth={depth + DEPTH_INCREMENT}
             name={variable.name}
@@ -273,7 +276,7 @@ class JsonObject extends React.PureComponent {
       } else {
         elements.push(
           <VariableEditor
-            {...props}
+            {...args}
             key={variable.name + '_' + namespace}
             variable={variable}
             singleIndent={SINGLE_INDENT}
@@ -290,10 +293,11 @@ class JsonObject extends React.PureComponent {
 //just store name, value and type with a variable
 class JsonVariable {
   constructor(name, value) {
-    let isPrimitive = value.type === 'primitive';
+    this.isPrimitive = value.type === 'primitive';
+    this.isVisible = value.isVisible;
     this.name = name;
-    this.value = isPrimitive ? toJS(value.value) : value;
-    this.type = toType(isPrimitive ? toJS(value.value) : value);
+    this.value = this.isPrimitive ? toJS(value.value) : value;
+    this.type = this.isPrimitive ? toType(toJS(value.value)) : value.type;
   }
 }
 

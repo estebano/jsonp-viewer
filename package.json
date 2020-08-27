@@ -8,6 +8,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "collections": "^5.1.11",
     "emotion": "^10.0.27",
     "flux": "^3.1.3",
     "jsonpath": "^1.0.2",
@@ -19,8 +20,10 @@
     "react": "^16.13.1",
     "react-base16-styling": "^0.7.0",
     "react-dom": "^16.13.1",
+    "react-infinite-scroller": "^1.2.4",
     "react-scripts": "3.4.3",
-    "react-textarea-autosize": "^8.2.0"
+    "react-textarea-autosize": "^8.2.0",
+    "shortid": "^2.2.15"
   },
   "scripts": {
     "start": "react-scripts start",

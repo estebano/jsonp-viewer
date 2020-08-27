@@ -10,7 +10,7 @@ class JsonViewer extends React.PureComponent {
     const namespace = [props.name];
     let ObjectComponent = JsonObject;
 
-    if (props.groupArraysAfterLength && props.src.length > props.groupArraysAfterLength) {
+    if (props.groupArraysAfterLength && props.src.value.length > props.groupArraysAfterLength) {
       ObjectComponent = ArrayGroup;
     }
 

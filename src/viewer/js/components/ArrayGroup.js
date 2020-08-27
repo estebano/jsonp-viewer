@@ -3,7 +3,7 @@ import { Theme } from './../themes/createStylist';
 
 import VariableMeta from './VariableMeta';
 import ObjectName from './ObjectName';
-import ObjectComponent from './DataTypes/JsonObject';
+import JsonObject from './DataTypes/JsonObject';
 
 //icons
 import { CollapsedIcon, ExpandedIcon } from './ToggleIcons';
@@ -56,6 +56,8 @@ class ArrayGroup extends React.PureComponent {
       ...rest
     } = this.props;
 
+    if (!src.isVisible) return null;
+
     let expanded_icon,
       object_padding_left = 0;
 
@@ -66,8 +68,7 @@ class ArrayGroup extends React.PureComponent {
     }
 
     const size = groupArraysAfterLength;
-    const groups = Math.ceil(src.length / size);
-
+    const groups = Math.ceil(src.value.length / size);
     return (
       <div
         className='object-key-val'
@@ -78,63 +79,68 @@ class ArrayGroup extends React.PureComponent {
         <ObjectName {...this.props} />
 
         <span>
-          <VariableMeta size={src.length} {...this.props} />
+          <VariableMeta size={src.value.length} {...this.props} />
         </span>
-        {[...Array(groups)].map((_, i) => (
-          <div
-            key={i}
-            className={cx('object-key-val', 'array-group', labeledStyles.objectKeyVal)}
-            style={{
-              marginLeft: 6,
-              paddingLeft: array_group_padding_left,
-            }}
-          >
-            <span className={cx(labeledStyles.braceRow)}>
-              <div
-                className={cx('icon-container', labeledStyles.iconContainer)}
-                onClick={(e) => {
-                  this.toggleCollapsed(i);
-                }}
-              >
-                {this.getExpandedIcon(i)}
-              </div>
-              {this.state.expanded[i] ? (
-                <ObjectComponent
-                  key={name + i}
-                  depth={0}
-                  name={false}
-                  collapsed={false}
-                  groupArraysAfterLength={size}
-                  index_offset={i * size}
-                  src={src.slice(i * size, i * size + size)}
-                  namespace={namespace}
-                  type='array'
-                  parent_type='array_group'
-                  {...rest}
-                />
-              ) : (
-                <span
+        {[...Array(groups)].map((_, i) => {
+          return (
+            <div
+              key={i}
+              className={cx('object-key-val', 'array-group', labeledStyles.objectKeyVal)}
+              style={{
+                marginLeft: 6,
+                paddingLeft: array_group_padding_left,
+              }}
+            >
+              <span className={cx(labeledStyles.braceRow)}>
+                <div
+                  className={cx('icon-container', labeledStyles.iconContainer)}
                   onClick={(e) => {
                     this.toggleCollapsed(i);
                   }}
-                  className={cx('array-group-brace', labeledStyles.brace)}
                 >
-                  [
-                  <div className={cx('array-group-meta-data', labeledStyles.arrayGroupMetaData)}>
-                    <span className={cx('object-size', labeledStyles.objectSize)}>
-                      {' '}
-                      {'>'}
-                      {i * size}
-                      {' - '}
-                      {i * size + size > src.length ? src.length : i * size + size}
-                    </span>
-                  </div>
-                  ]
-                </span>
-              )}
-            </span>
-          </div>
-        ))}
+                  {this.getExpandedIcon(i)}
+                </div>
+                {this.state.expanded[i] ? (
+                  <JsonObject
+                    key={name + i}
+                    depth={0}
+                    name={false}
+                    collapsed={false}
+                    groupArraysAfterLength={size}
+                    index_offset={i * size}
+                    src={src.slice.call(src, i * size, i * size + size)}
+                    namespace={namespace}
+                    type='array'
+                    parent_type='array_group'
+                    cx={cx}
+                    labeledStyles={labeledStyles}
+                    theme={theme}
+                    {...rest}
+                  />
+                ) : (
+                  <span
+                    onClick={(e) => {
+                      this.toggleCollapsed(i);
+                    }}
+                    className={cx('array-group-brace', labeledStyles.brace)}
+                  >
+                    [
+                    <div className={cx('array-group-meta-data', labeledStyles.arrayGroupMetaData)}>
+                      <span className={cx('object-size', labeledStyles.objectSize)}>
+                        {' '}
+                        {'>'}
+                        {i * size}
+                        {' - '}
+                        {i * size + size > src.value.length ? src.value.length : i * size + size}
+                      </span>
+                    </div>
+                    ]
+                  </span>
+                )}
+              </span>
+            </div>
+          );
+        })}
       </div>
     );
   }

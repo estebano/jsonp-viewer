@@ -104,30 +104,15 @@ const App = observer(() => {
           </Grid>
         </Grid>
       </header>
-      <Grid container alignItems='flex-start' spacing={2}>
-        <Grid item xs={6}>
-          {store && (
-            <ReactJsonView
-              store={store}
-              src={store.tree}
-              iconStyle='square'
-              displayDataTypes={false}
-              enableClipboard={false}
-            />
-          )}
-        </Grid>
-        <Grid item xs={6}>
-          {/* <table>
-        {paths.map((val, index) => (
-          <tr key={index}>
-            <td>{jp.stringify(val)}</td>
-            <td>{acc[index]}</td>
-            <td>{values[index]}</td>
-          </tr>
-        ))}
-      </table> */}
-        </Grid>
-      </Grid>
+      {store && (
+        <ReactJsonView
+          store={store}
+          src={store.tree}
+          iconStyle='square'
+          displayDataTypes={false}
+          enableClipboard={false}
+        />
+      )}
     </div>
   );
 });
