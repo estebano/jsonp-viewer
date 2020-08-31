@@ -26,8 +26,10 @@ import { Edit, CheckCircle, RemoveCircle as Remove } from './icons';
 
 //theme
 import { Theme } from './../themes/createStylist';
+import equal from 'fast-deep-equal/react';
+import { toJS } from 'mobx';
 
-class VariableEditor extends React.PureComponent {
+class VariableEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -41,9 +43,14 @@ class VariableEditor extends React.PureComponent {
     };
   }
 
+  shouldComponentUpdate(nextProps) {
+    return !equal(nextProps, this.props);
+  }
+
   render() {
     const {
-      variable,
+      src,
+      name,
       singleIndent,
       type,
       theme,
@@ -56,33 +63,35 @@ class VariableEditor extends React.PureComponent {
       rjvId,
       cx,
       labeledStyles,
+      isMatched,
     } = this.props;
 
-    if (!variable.isVisible) return null;
+    if (!src.isVisible) return null;
 
     const { editMode } = this.state;
+    const nativeValue = toJS(src.value);
 
     return (
       <div
         {...Theme(theme, 'objectKeyVal', {
           paddingLeft: indentWidth * singleIndent,
         })}
-        className='variable-row'
-        key={variable.name}
+        className={cx('variable-row', { 'is-matched': isMatched })}
+        key={name}
       >
-        {type == 'array' ? (
-          <span className={cx(labeledStyles.arrayKey)} key={variable.name + '_' + namespace}>
-            {variable.name}
+        {type === 'array' ? (
+          <span className={cx(labeledStyles.arrayKey)} key={name + '_' + namespace}>
+            {name}
             <div className={cx(labeledStyles.colon)}>:</div>
           </span>
         ) : (
           <span>
             <span
               className={cx('object-key', labeledStyles.objectName)}
-              key={variable.name + '_' + namespace}
+              key={name + '_' + namespace}
             >
               <span style={{ verticalAlign: 'top' }}>"</span>
-              <span style={{ display: 'inline-block' }}>{variable.name}</span>
+              <span style={{ display: 'inline-block' }}>{name}</span>
               <span style={{ verticalAlign: 'top' }}>"</span>
             </span>
             <span className={cx(labeledStyles.colon)}>:</span>
@@ -96,11 +105,11 @@ class VariableEditor extends React.PureComponent {
               : (e) => {
                   let location = [...namespace];
                   if ((e.ctrlKey || e.metaKey) && onEdit !== false) {
-                    this.prepopInput(variable);
+                    this.prepopInput();
                   } else if (onSelect !== false) {
                     location.shift();
                     onSelect({
-                      ...variable,
+                      ...src,
                       namespace: location,
                     });
                   }
@@ -110,12 +119,12 @@ class VariableEditor extends React.PureComponent {
             cursor: onSelect === false ? 'default' : 'pointer',
           })}
         >
-          {this.getValue(variable, editMode)}
+          {this.getValue(editMode, nativeValue)}
         </div>
         {enableClipboard ? (
           <CopyToClipboard
             hidden={editMode}
-            src={variable.value}
+            src={nativeValue}
             clickCallback={enableClipboard}
             namespace={namespace}
           />
@@ -127,23 +136,24 @@ class VariableEditor extends React.PureComponent {
   }
 
   getEditIcon = () => {
-    const { variable, cx, labeledStyles } = this.props;
+    const { cx, labeledStyles } = this.props;
 
     return (
       <div className='click-to-edit' style={{ verticalAlign: 'top' }}>
         <Edit
           className={cx('click-to-edit-icon', labeledStyles.editVarIcon)}
           onClick={() => {
-            this.prepopInput(variable);
+            this.prepopInput();
           }}
         />
       </div>
     );
   };
 
-  prepopInput = (variable) => {
+  prepopInput = () => {
+    const { src } = this.props;
     if (this.props.onEdit !== false) {
-      const stringifiedValue = stringifyVariable(variable.value);
+      const stringifiedValue = stringifyVariable(src.value);
       const detected = parseInput(stringifiedValue);
       this.setState({
         editMode: true,
@@ -157,7 +167,7 @@ class VariableEditor extends React.PureComponent {
   };
 
   getRemoveIcon = () => {
-    const { variable, namespace, cx, labeledStyles, rjvId } = this.props;
+    const { name, src, namespace, cx, labeledStyles, rjvId } = this.props;
 
     return (
       <div className='click-to-remove' style={{ verticalAlign: 'top' }}>
@@ -168,9 +178,9 @@ class VariableEditor extends React.PureComponent {
               name: 'VARIABLE_REMOVED',
               rjvId: rjvId,
               data: {
-                name: variable.name,
+                name: name,
                 namespace: namespace,
-                existing_value: variable.value,
+                existing_value: src.value,
                 variable_removed: true,
               },
             });
@@ -180,22 +190,23 @@ class VariableEditor extends React.PureComponent {
     );
   };
 
-  getValue = (variable, editMode) => {
-    const type = editMode ? false : variable.type;
+  getValue = (editMode, nativeValue) => {
+    const { src } = this.props;
+    const type = editMode ? false : toType(nativeValue);
     const { props } = this;
     switch (type) {
       case false:
         return this.getEditInput();
       case 'string':
-        return <JsonString value={variable.value} {...props} />;
+        return <JsonString value={src.value} {...props} />;
       case 'integer':
-        return <JsonInteger value={variable.value} {...props} />;
+        return <JsonInteger value={src.value} {...props} />;
       case 'float':
-        return <JsonFloat value={variable.value} {...props} />;
+        return <JsonFloat value={src.value} {...props} />;
       case 'boolean':
-        return <JsonBoolean value={variable.value} {...props} />;
+        return <JsonBoolean value={src.value} {...props} />;
       case 'function':
-        return <JsonFunction value={variable.value} {...props} />;
+        return <JsonFunction value={src.value} {...props} />;
       case 'null':
         return <JsonNull {...props} />;
       case 'nan':
@@ -203,12 +214,12 @@ class VariableEditor extends React.PureComponent {
       case 'undefined':
         return <JsonUndefined {...props} />;
       case 'date':
-        return <JsonDate value={variable.value} {...props} />;
+        return <JsonDate value={src.value} {...props} />;
       case 'regexp':
-        return <JsonRegexp value={variable.value} {...props} />;
+        return <JsonRegexp value={src.value} {...props} />;
       default:
         // catch-all for types that weren't anticipated
-        return <div className='object-value'>{JSON.stringify(variable.value)}</div>;
+        return <div className='object-value'>{JSON.stringify(src.value)}</div>;
     }
   };
 

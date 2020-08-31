@@ -1,14 +1,13 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import './App.css';
 import { TextField, Grid, Button } from '@material-ui/core';
-import jp from 'jsonpath';
-import { get } from 'lodash';
+
 //import { recursiveMerge } from './Store';
 import { observer } from 'mobx-react';
 import ReactJsonView from './viewer/js/ReactJsonView';
-import { cx, css } from 'emotion';
 import { useSnackbar } from 'notistack';
 import MobXStore from './viewer/js/stores/MobXStore';
+import { debounce } from 'lodash';
 
 const readFileAsync = async (file) => {
   return new Promise((resolve, reject) => {
@@ -29,9 +28,13 @@ const App = observer(() => {
   const [store, setStore] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
 
-  const onFormulaChange = useCallback((e) => {
-    setFormula(e.target.value);
-  }, []);
+  const onFormulaChangeDebounced = useCallback(
+    (e) => {
+      setFormula(e.target.value);
+      store && store.setJsonPath(e.target.value);
+    },
+    [store]
+  );
 
   const onFileChange = useCallback(
     async (e) => {
@@ -52,35 +55,13 @@ const App = observer(() => {
     [enqueueSnackbar]
   );
 
-  // const tree = store.tree;
-  // let paths = [];
-  // let acc = [];
-  // let values = [];
-
-  // if (formula && formula !== '') {
-  //   try {
-  //     paths = jp.paths(tree, formula);
-  //     values = paths.map((path, i) => {
-  //       let x = jp.stringify(path);
-  //       if (x.startsWith('$')) {
-  //         x = x.slice(1);
-  //       }
-  //       acc.push(x);
-  //       let v = get(tree, x);
-  //       return typeof v !== 'string' ? JSON.stringify(v) : v;
-  //     });
-  //   } catch (e) {
-  //     console.warn(e);
-  //   }
-  // }
-
   return (
     <div className='App'>
       <header className='App-header'>
         <Grid container alignItems='flex-start' spacing={2}>
           <Grid item xs={6}>
             <TextField
-              onChange={onFormulaChange}
+              onChange={onFormulaChangeDebounced}
               variant='outlined'
               label='JSONPath formula'
               className='fullwidth'
@@ -92,7 +73,7 @@ const App = observer(() => {
                 id='upload'
                 type='file'
                 accept='.json'
-                className={css({ display: 'none' })}
+                style={{ display: 'none' }}
                 onChange={onFileChange}
               />
               <label htmlFor='upload'>

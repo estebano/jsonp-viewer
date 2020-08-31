@@ -17,11 +17,7 @@ import { CollapsedIcon, ExpandedIcon } from '../ToggleIcons';
 //theme
 import { Theme } from '../../themes/createStylist';
 import { observer } from 'mobx-react';
-import { get as _get } from 'lodash';
-import { get, toJS } from 'mobx';
-import { stringify } from 'jsonpath';
-import { useIsFocusVisible } from '@material-ui/core';
-
+import { toJS, trace } from 'mobx';
 //increment 1 with each nested object & array
 const DEPTH_INCREMENT = 1;
 //single indent is 5px
@@ -38,29 +34,22 @@ class JsonObject extends React.PureComponent {
   }
 
   static getState = (props) => {
-    const { store, namespace } = props;
-    const size = Object.keys(props.src.value).length;
+    const { src } = props;
+    const size = Object.keys(src.value).length;
     const expanded =
       (props.collapsed === false || (props.collapsed !== true && props.collapsed > props.depth)) &&
       (!props.shouldCollapse ||
         props.shouldCollapse({
           name: props.name,
-          src: props.src,
-          type: toType(props.src),
-          namespace: props.namespace,
+          src: src,
+          type: toType(src.value),
+          namespace: src.namespace,
         }) === false) &&
       //initialize closed if object has no items
       size !== 0;
     const state = {
-      expanded:
-        namespace.length === 1
-          ? !store.tree.isCollapsed
-          : (() => {
-              let v = !_get(store.tree, namespace.slice(1).push('isCollapsed'));
-
-              return v;
-            })(),
-      isMatched: _get(store.tree, namespace.slice(1).push('isMatched')),
+      expanded: !src.isCollapsed,
+      isMatched: src.isMatched,
       // AttributeStore.get(props.rjvId, props.namespace, 'expanded', expanded),
       object_type: props.type === 'array' ? 'array' : 'object',
       parent_type: props.type === 'array' ? 'array' : 'object',
@@ -75,7 +64,6 @@ class JsonObject extends React.PureComponent {
       nextProps.src !== prevProps.src ||
       nextProps.collapsed !== prevProps.collapsed ||
       nextProps.name !== prevProps.name ||
-      nextProps.namespace !== prevProps.namespace ||
       nextProps.rjvId !== prevProps.rjvId
     ) {
       const newState = JsonObject.getState(nextProps);
@@ -93,24 +81,23 @@ class JsonObject extends React.PureComponent {
         expanded: !this.state.expanded,
       },
       () => {
-        AttributeStore.set(this.props.rjvId, this.props.namespace, 'expanded', this.state.expanded);
-        this.props.store.toggleCollapsed(this.props.namespace);
+        this.props.src.isCollapsed = !this.state.expanded;
       }
     );
   };
 
-  getObjectContent = (depth, src, args) => {
+  getObjectContent = (depth, value, args) => {
     const { cx, labeledStyles } = this.props;
     return (
       <div className={cx('pushed-content', 'object-container', { 'cls-hidden': args.hidden })}>
         <div className={cx('object-content', labeledStyles.objectContent)}>
-          {this.renderObjectContents(src, args)}
+          {this.renderObjectContents(value, args)}
         </div>
       </div>
     );
   };
 
-  getEllipsis = () => {
+  getEllipsis = (expanded) => {
     const { size } = this.state;
     const { cx, labeledStyles } = this.props;
 
@@ -119,7 +106,10 @@ class JsonObject extends React.PureComponent {
       return null;
     } else {
       return (
-        <div className={cx('node-ellipsis', labeledStyles.ellipsis)} onClick={this.toggleCollapsed}>
+        <div
+          className={cx('node-ellipsis', labeledStyles.ellipsis, { 'cls-hidden': expanded })}
+          onClick={this.toggleCollapsed}
+        >
           ...
         </div>
       );
@@ -171,7 +161,6 @@ class JsonObject extends React.PureComponent {
     const {
       depth,
       src,
-      namespace,
       name,
       type,
       parent_type,
@@ -185,7 +174,8 @@ class JsonObject extends React.PureComponent {
 
     if (!src.isVisible) return null;
 
-    const { object_type, expanded, isMatched } = this.state;
+    const { object_type, expanded } = this.state;
+    const isMatched = src.isMatched;
 
     let styles = {};
     if (!jsvRoot && parent_type !== 'array_group') {
@@ -195,9 +185,12 @@ class JsonObject extends React.PureComponent {
       styles.display = 'inline';
     }
 
+    if (depth === 1) {
+      trace();
+    }
     return (
       <div
-        className={cx('object-key-val', isMatched ? 'matched' : '')}
+        className={cx('object-key-val', { 'is-matched': isMatched })}
         {...Theme(theme, jsvRoot ? 'jsv-root' : 'objectKeyVal', styles)}
       >
         {this.getBraceStart(object_type, expanded)}
@@ -209,7 +202,7 @@ class JsonObject extends React.PureComponent {
           theme,
           hidden: !expanded,
         })}
-        {this.getEllipsis()}
+        {this.getEllipsis(expanded)}
         <span className='brace-row'>
           <span
             className={cx(labeledStyles.brace)}
@@ -226,8 +219,9 @@ class JsonObject extends React.PureComponent {
   }
 
   renderObjectContents = (variables, args) => {
-    const { depth, parent_type, index_offset, groupArraysAfterLength, namespace } = this.props;
+    const { depth, parent_type, index_offset, groupArraysAfterLength, src } = this.props;
     const { object_type } = this.state;
+    const { hidden, ...restArgs } = args;
     let elements = [],
       variable;
     let keys = Object.keys(variables || {});
@@ -240,17 +234,14 @@ class JsonObject extends React.PureComponent {
       if (parent_type === 'array_group' && index_offset) {
         variable.name = parseInt(variable.name) + index_offset;
       }
-      if (!variables.hasOwnProperty(name)) {
-        return;
-      } else if (variable.type === 'object') {
+      if (variable.type === 'object') {
         elements.push(
           <JsonObject
-            {...args}
+            {...restArgs}
             key={variable.name}
             depth={depth + DEPTH_INCREMENT}
             name={variable.name}
             src={variable.value}
-            namespace={namespace.concat(['value', variable.name])}
             parent_type={object_type}
           />
         );
@@ -263,12 +254,11 @@ class JsonObject extends React.PureComponent {
 
         elements.push(
           <ObjectComponent
-            {...args}
+            {...restArgs}
             key={variable.name}
             depth={depth + DEPTH_INCREMENT}
             name={variable.name}
             src={variable.value}
-            namespace={namespace.concat(['value', variable.name])}
             type='array'
             parent_type={object_type}
           />
@@ -276,12 +266,14 @@ class JsonObject extends React.PureComponent {
       } else {
         elements.push(
           <VariableEditor
-            {...args}
-            key={variable.name + '_' + namespace}
-            variable={variable}
+            {...restArgs}
+            key={name + '_' + src.namespace}
+            name={name}
+            src={variables[name]}
             singleIndent={SINGLE_INDENT}
-            namespace={namespace}
             type={this.props.type}
+            isMatched={variable.isMatched}
+            namespace={src.namespace}
           />
         );
       }
@@ -295,6 +287,7 @@ class JsonVariable {
   constructor(name, value) {
     this.isPrimitive = value.type === 'primitive';
     this.isVisible = value.isVisible;
+    this.isMatched = value.isMatched;
     this.name = name;
     this.value = this.isPrimitive ? toJS(value.value) : value;
     this.type = this.isPrimitive ? toType(toJS(value.value)) : value.type;

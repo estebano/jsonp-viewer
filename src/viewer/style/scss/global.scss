@@ -25,10 +25,6 @@
         display: inline-block;
       }
     }
-    &.matched {
-      border: 1px dashed darkgreen;
-      background-color: lightgreen;
-    }
   }
 
   .variable-row {
@@ -51,4 +47,13 @@
 
 .cls-hidden {
   display: none;
+}
+
+div.cls-hidden {
+  display: none;
+}
+
+.is-matched {
+  background-color: lightgreen;
+  border: 1px dashed darkgreen;
 }

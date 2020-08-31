@@ -101,8 +101,6 @@ class ReactJsonView extends React.PureComponent {
         return val + current.duration;
       }, 0)
     );
-
-    this.props.store.showNextPage(300);
   }
 
   componentDidUpdate(prevProps, prevState) {
