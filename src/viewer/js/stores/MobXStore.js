@@ -177,12 +177,6 @@ class Store {
       return;
     }
     try {
-      // jp.apply(this.tree, formula, (node) => {
-      //   console.log('node', node);
-      //   debugger;
-      //   node.isMatched = true;
-      //   return node;
-      // });
       let nodes = jp.query(this.tree, formula);
       console.log(`applyinf formula on ${nodes.count} nodes`);
       nodes.forEach((node) => {
@@ -190,7 +184,7 @@ class Store {
       });
       this.formula = formula;
     } catch (ex) {
-      // console.warn('jsonpath', ex);
+      console.log('jsonpath', ex);
     }
   }
 

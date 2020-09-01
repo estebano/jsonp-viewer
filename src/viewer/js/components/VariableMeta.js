@@ -1,5 +1,4 @@
 import React from 'react';
-import dispatcher from './../helpers/dispatcher';
 
 import CopyToClipboard from './CopyToClipboard';
 import { toType } from './../helpers/util';
@@ -35,20 +34,7 @@ export default class extends React.PureComponent {
               key_name: null,
             };
             if (toType(src) === 'object') {
-              dispatcher.dispatch({
-                name: 'ADD_VARIABLE_KEY_REQUEST',
-                rjvId: rjvId,
-                data: request,
-              });
             } else {
-              dispatcher.dispatch({
-                name: 'VARIABLE_ADDED',
-                rjvId: rjvId,
-                data: {
-                  ...request,
-                  new_value: [...src, null],
-                },
-              });
             }
           }}
         />
@@ -67,18 +53,7 @@ export default class extends React.PureComponent {
       <span className='click-to-remove'>
         <Remove
           className={cx('click-to-remove-icon', labeledStyles.removeVarIcon)}
-          onClick={() => {
-            dispatcher.dispatch({
-              name: 'VARIABLE_REMOVED',
-              rjvId: rjvId,
-              data: {
-                name: name,
-                namespace: namespace.splice(0, namespace.length - 1),
-                existing_value: src,
-                variable_removed: true,
-              },
-            });
-          }}
+          onClick={() => {}}
         />
       </span>
     );

@@ -24,17 +24,19 @@ const readFileAsync = async (file) => {
 };
 
 const App = observer(() => {
-  const [formula, setFormula] = useState('');
   const [store, setStore] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
 
-  const onFormulaChangeDebounced = useCallback(
-    (e) => {
-      setFormula(e.target.value);
-      store && store.setJsonPath(e.target.value);
-    },
+  const newFormulaDebounced = useCallback(
+    debounce((value) => {
+      store && store.setJsonPath(value);
+    }, 1000),
     [store]
   );
+
+  const onFormulaChangeDebounced = useCallback((e) => newFormulaDebounced(e.target.value), [
+    newFormulaDebounced,
+  ]);
 
   const onFileChange = useCallback(
     async (e) => {
@@ -92,6 +94,7 @@ const App = observer(() => {
           iconStyle='square'
           displayDataTypes={false}
           enableClipboard={false}
+          collapseStringsAfterLength={35}
         />
       )}
     </div>

@@ -8,9 +8,6 @@ import VariableMeta from '../VariableMeta';
 import ArrayGroup from '../ArrayGroup';
 import ObjectName from '../ObjectName';
 
-//attribute store
-import AttributeStore from '../../stores/ObjectAttributes';
-
 //icons
 import { CollapsedIcon, ExpandedIcon } from '../ToggleIcons';
 
@@ -50,7 +47,6 @@ class JsonObject extends React.PureComponent {
     const state = {
       expanded: !src.isCollapsed,
       isMatched: src.isMatched,
-      // AttributeStore.get(props.rjvId, props.namespace, 'expanded', expanded),
       object_type: props.type === 'array' ? 'array' : 'object',
       parent_type: props.type === 'array' ? 'array' : 'object',
       size,

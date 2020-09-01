@@ -2,7 +2,6 @@ import React from 'react';
 import AutosizeTextarea from 'react-textarea-autosize';
 
 import { toType } from './../helpers/util';
-import dispatcher from './../helpers/dispatcher';
 import parseInput from './../helpers/parseInput';
 import stringifyVariable from './../helpers/stringifyVariable';
 import CopyToClipboard from './CopyToClipboard';
@@ -19,7 +18,7 @@ import {
   JsonRegexp,
   JsonString,
   JsonUndefined,
-} from './DataTypes/DataTypes';
+} from './DataTypes';
 
 //clibboard icon
 import { Edit, CheckCircle, RemoveCircle as Remove } from './icons';
@@ -58,9 +57,7 @@ class VariableEditor extends React.Component {
       indentWidth,
       enableClipboard,
       onEdit,
-      onDelete,
       onSelect,
-      rjvId,
       cx,
       labeledStyles,
       isMatched,
@@ -129,26 +126,9 @@ class VariableEditor extends React.Component {
             namespace={namespace}
           />
         ) : null}
-        {onEdit !== false && editMode == false ? this.getEditIcon() : null}
-        {onDelete !== false && editMode == false ? this.getRemoveIcon() : null}
       </div>
     );
   }
-
-  getEditIcon = () => {
-    const { cx, labeledStyles } = this.props;
-
-    return (
-      <div className='click-to-edit' style={{ verticalAlign: 'top' }}>
-        <Edit
-          className={cx('click-to-edit-icon', labeledStyles.editVarIcon)}
-          onClick={() => {
-            this.prepopInput();
-          }}
-        />
-      </div>
-    );
-  };
 
   prepopInput = () => {
     const { src } = this.props;
@@ -166,30 +146,6 @@ class VariableEditor extends React.Component {
     }
   };
 
-  getRemoveIcon = () => {
-    const { name, src, namespace, cx, labeledStyles, rjvId } = this.props;
-
-    return (
-      <div className='click-to-remove' style={{ verticalAlign: 'top' }}>
-        <Remove
-          className={cx('click-to-remove-icon', labeledStyles.editVarIcon)}
-          onClick={() => {
-            dispatcher.dispatch({
-              name: 'VARIABLE_REMOVED',
-              rjvId: rjvId,
-              data: {
-                name: name,
-                namespace: namespace,
-                existing_value: src.value,
-                variable_removed: true,
-              },
-            });
-          }}
-        />
-      </div>
-    );
-  };
-
   getValue = (editMode, nativeValue) => {
     const { src } = this.props;
     const type = editMode ? false : toType(nativeValue);
@@ -198,7 +154,7 @@ class VariableEditor extends React.Component {
       case false:
         return this.getEditInput();
       case 'string':
-        return <JsonString value={src.value} {...props} />;
+        return <JsonString {...props} />;
       case 'integer':
         return <JsonInteger value={src.value} {...props} />;
       case 'float':
@@ -206,7 +162,7 @@ class VariableEditor extends React.Component {
       case 'boolean':
         return <JsonBoolean value={src.value} {...props} />;
       case 'function':
-        return <JsonFunction value={src.value} {...props} />;
+        return <JsonFunction {...props} />;
       case 'null':
         return <JsonNull {...props} />;
       case 'nan':
@@ -294,17 +250,6 @@ class VariableEditor extends React.Component {
     }
     this.setState({
       editMode: false,
-    });
-    dispatcher.dispatch({
-      name: 'VARIABLE_UPDATED',
-      rjvId: rjvId,
-      data: {
-        name: variable.name,
-        namespace: namespace,
-        existing_value: variable.value,
-        new_value: new_value,
-        variable_removed: false,
-      },
     });
   };
 

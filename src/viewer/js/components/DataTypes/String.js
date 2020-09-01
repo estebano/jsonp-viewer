@@ -1,46 +1,23 @@
 import React from 'react';
 import DataTypeLabel from './DataTypeLabel';
 import { toType } from './../../helpers/util';
+import { observer } from 'mobx-react';
 
-//attribute store for storing collapsed state
-import AttributeStore from './../../stores/ObjectAttributes';
-
-export default class extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      collapsed: AttributeStore.get(props.rjvId, props.namespace, 'collapsed', true),
-    };
-  }
-
+class Strings extends React.PureComponent {
   toggleCollapsed = () => {
-    this.setState(
-      {
-        collapsed: !this.state.collapsed,
-      },
-      () => {
-        AttributeStore.set(
-          this.props.rjvId,
-          this.props.namespace,
-          'collapsed',
-          this.state.collapsed
-        );
-      }
-    );
+    this.props.src.isCollapsed = !this.props.src.isCollapsed;
   };
 
   render() {
     const type_name = 'string';
-    const { collapsed } = this.state;
     const { props } = this;
-    const { collapseStringsAfterLength, cx, labeledStyles } = props;
-    let { value } = props;
+    const { collapseStringsAfterLength, cx, labeledStyles, src } = props;
     let collapsible = toType(collapseStringsAfterLength) === 'integer';
     let style = { style: { cursor: 'default' } };
-
+    let value = src.value;
     if (collapsible && value.length > collapseStringsAfterLength) {
       style.style.cursor = 'pointer';
-      if (this.state.collapsed) {
+      if (src.isCollapsed) {
         value = (
           <span>
             {value.substring(0, collapseStringsAfterLength)}
@@ -60,3 +37,5 @@ export default class extends React.PureComponent {
     );
   }
 }
+
+export default observer(Strings);
