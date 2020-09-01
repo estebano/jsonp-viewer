@@ -43,7 +43,7 @@ export default class extends React.PureComponent {
   };
 
   getRemoveObject = () => {
-    const { cx, labeledStyles, hover, namespace, name, src, rjvId } = this.props;
+    const { cx, labeledStyles, namespace } = this.props;
 
     //don't allow deleting of root node
     if (namespace.length === 1) {

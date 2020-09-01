@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import './App.css';
 import { TextField, Grid, Button } from '@material-ui/core';
 
@@ -26,6 +26,7 @@ const readFileAsync = async (file) => {
 const App = observer(() => {
   const [store, setStore] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
+  const formulaInputRef = useRef(null);
 
   const newFormulaDebounced = useCallback(
     debounce((value) => {
@@ -40,6 +41,7 @@ const App = observer(() => {
 
   const onFileChange = useCallback(
     async (e) => {
+      formulaInputRef.current.value = '';
       const target = e.target;
       if (target.files.length === 0) {
         enqueueSnackbar('No file choosen to load', { variant: 'warning' });
@@ -54,7 +56,7 @@ const App = observer(() => {
         enqueueSnackbar('Invalid file selected or bad json format.', { variant: 'error' });
       }
     },
-    [enqueueSnackbar]
+    [enqueueSnackbar, formulaInputRef]
   );
 
   return (
@@ -63,6 +65,7 @@ const App = observer(() => {
         <Grid container alignItems='flex-start' spacing={2}>
           <Grid item xs={6}>
             <TextField
+              inputRef={formulaInputRef}
               onChange={onFormulaChangeDebounced}
               variant='outlined'
               label='JSONPath formula'
